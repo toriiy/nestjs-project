@@ -1,42 +1,38 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  HttpCode,
+  HttpStatus,
+  Post,
 } from '@nestjs/common';
+import { ApiResponse } from '@nestjs/swagger';
+
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { CreateUserDto } from '../user/dto/req/create-user.dto';
+import { UserResponseDto } from '../user/dto/res/user-response.dto';
+import { SingInDto } from './dto/req/singIn.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @ApiResponse({ status: HttpStatus.CREATED, type: UserResponseDto })
+  @HttpCode(201)
+  @Post('sing-up')
+  async singUp(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    return await this.authService.singUp(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('sing-in')
+  async singIn(@Body() singInDto: SingInDto) {
+    return await this.authService.singIn(singInDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @HttpCode(204)
+  @Delete('sing-out')
+  async singOut(): Promise<void> {
+    return await this.authService.singOut();
   }
 }

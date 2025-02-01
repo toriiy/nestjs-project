@@ -1,26 +1,62 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Post } from '../database/entities/post.entity';
+import { CreatePostDto } from './dto/req/create-post.dto';
+import { UpdatePostDto } from './dto/req/update-post.dto';
+import { PostResponseDto } from './dto/res/post-response.dto';
 
 @Injectable()
 export class PostService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(
+    @InjectRepository(Post)
+    private readonly postRepository: Repository<Post>,
+  ) {}
+
+  async create(createPostDto: CreatePostDto): Promise<PostResponseDto> {
+    try {
+      return await this.postRepository.save(
+        this.postRepository.create(createPostDto),
+      );
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
-  findAll() {
-    return `This action returns all post`;
+  async findAll(): Promise<PostResponseDto[]> {
+    try {
+      return await this.postRepository.find();
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(id: string): Promise<PostResponseDto> {
+    try {
+      return await this.postRepository.findOne({ where: { id } });
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(
+    id: string,
+    updatePostDto: UpdatePostDto,
+  ): Promise<PostResponseDto> {
+    try {
+      await this.postRepository.update(id, updatePostDto);
+      return await this.postRepository.findOne({ where: { id } });
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: string): Promise<void> {
+    try {
+      await this.postRepository.delete(id);
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 }

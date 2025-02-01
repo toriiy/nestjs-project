@@ -1,26 +1,62 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+
+import { User } from '../database/entities/user.entity';
+import { CreateUserDto } from '../user/dto/req/create-user.dto';
+import { UserResponseDto } from '../user/dto/res/user-response.dto';
+import { SingInDto } from './dto/req/singIn.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
+
+  async singUp(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    try {
+      const isEmailUnique = await this.userRepository.findOne({
+        where: { email: createUserDto.email },
+      });
+
+      if (isEmailUnique) {
+        throw new BadRequestException('Email must be unique');
+      }
+
+      const password = await bcrypt.hash(createUserDto.password, 10);
+
+      const user = await this.userRepository.save(
+        this.userRepository.create({ ...createUserDto, password }),
+      );
+
+      return {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        age: user.age,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async singIn(singInDto: SingInDto) {
+    try {
+      console.log(singInDto);
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async singOut(): Promise<void> {
+    try {
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 }
