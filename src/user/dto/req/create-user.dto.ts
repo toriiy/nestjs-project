@@ -8,6 +8,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -32,6 +33,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
+  @Transform(({ value }) => value.trim())
   @ApiProperty({ example: 'test@gmail.com' })
   email: string;
 

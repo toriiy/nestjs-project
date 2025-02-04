@@ -1,5 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { DateEntity } from './date.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Post extends DateEntity {
@@ -11,4 +18,13 @@ export class Post extends DateEntity {
 
   @Column('text', { nullable: false })
   body: string;
+
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => User, (entity) => entity.posts, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user?: User;
 }

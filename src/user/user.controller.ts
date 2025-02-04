@@ -7,28 +7,40 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/req/update-user.dto';
-import { User } from '../database/entities/user.entity';
 import { UserResponseDto } from './dto/res/user-response.dto';
+import { PaginatedUserResponseDto } from './dto/res/paginated-user-response.dto';
+import { UserQueryDto } from './dto/query/user-query.validator';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiResponse({ status: HttpStatus.OK, type: PaginatedUserResponseDto })
   @Get('/list')
-  async findAll(): Promise<User[]> {
-    return await this.userService.findAll();
+  async findAll(
+    @Query() query?: UserQueryDto,
+  ): Promise<PaginatedUserResponseDto> {
+    return await this.userService.findAll(query);
   }
 
   @ApiResponse({ status: HttpStatus.OK, type: UserResponseDto })
   @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    return await this.userService.findOne(id);
+  async findOneById(@Param('id') id: string): Promise<UserResponseDto> {
+    return await this.userService.findOneById(id);
+  }
+
+  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDto })
+  @Get('email/:email')
+  async findOneByEmail(
+    @Param('email') email: string,
+  ): Promise<UserResponseDto> {
+    return await this.userService.findOneByEmail(email);
   }
 
   @ApiResponse({ status: HttpStatus.CREATED, type: UserResponseDto })

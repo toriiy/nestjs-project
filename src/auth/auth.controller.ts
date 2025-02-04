@@ -26,7 +26,7 @@ export class AuthController {
 
   @Post('sing-in')
   async singIn(@Body() singInDto: SingInDto) {
-    return await this.authService.singIn(singInDto);
+    return await this.authService.singIn(singInDto.email, singInDto.password);
   }
 
   @ApiResponse({ status: HttpStatus.NO_CONTENT })

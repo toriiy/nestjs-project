@@ -6,7 +6,6 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../database/entities/user.entity';
 import { CreateUserDto } from '../user/dto/req/create-user.dto';
 import { UserResponseDto } from '../user/dto/res/user-response.dto';
-import { SingInDto } from './dto/req/singIn.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,9 +44,22 @@ export class AuthService {
     }
   }
 
-  async singIn(singInDto: SingInDto) {
+  async singIn(userEmail: string, userPassword: string) {
     try {
-      console.log(singInDto);
+      const user = await this.userRepository.findOne({
+        where: { email: userEmail },
+      });
+      if (!user) {
+        throw new BadRequestException('Incorrect email or password');
+      }
+
+      const isPasswordCorrect = await bcrypt.compare(
+        userPassword,
+        user.password,
+      );
+      if (!isPasswordCorrect) {
+        throw new BadRequestException('Incorrect password');
+      }
     } catch (e) {
       throw new BadRequestException(e.message);
     }
