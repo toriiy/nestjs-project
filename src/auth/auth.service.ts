@@ -1,20 +1,51 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
+import { JwtService } from '@nestjs/jwt';
 
 import { User } from '../database/entities/user.entity';
 import { CreateUserDto } from '../user/dto/req/create-user.dto';
-import { UserResponseDto } from '../user/dto/res/user-response.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRedisClient()
+    private readonly redisClient: RedisClient,
+    private readonly jwtService: JwtService,
   ) {}
+  async validateUser(userEmail: string, userId: string): Promise<User> {
+    try {
+      if (!userEmail || !userId) {
+        throw new UnauthorizedException();
+      }
 
-  async singUp(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, email: userEmail },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user;
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
+  }
+
+  async createToken(userId: string, userEmail: string): Promise<string> {
+    return this.jwtService.sign({ id: userId, email: userEmail });
+  }
+
+  async singUp(createUserDto: CreateUserDto): Promise<{ accessToken: string }> {
     try {
       const isEmailUnique = await this.userRepository.findOne({
         where: { email: createUserDto.email },
@@ -30,21 +61,28 @@ export class AuthService {
         this.userRepository.create({ ...createUserDto, password }),
       );
 
-      return {
-        id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        age: user.age,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
+      if (!user) {
+        throw new BadRequestException();
+      }
+
+      const token = await this.createToken(user.id, user.email);
+
+      await this.redisClient.setEx(
+        `user-token-${user.id}`,
+        2 * 24 * 60 * 60,
+        token,
+      );
+
+      return { accessToken: token };
     } catch (e) {
       throw new BadRequestException(e.message);
     }
   }
 
-  async singIn(userEmail: string, userPassword: string) {
+  async singIn(
+    userEmail: string,
+    userPassword: string,
+  ): Promise<{ accessToken: string }> {
     try {
       const user = await this.userRepository.findOne({
         where: { email: userEmail },
@@ -60,13 +98,23 @@ export class AuthService {
       if (!isPasswordCorrect) {
         throw new BadRequestException('Incorrect password');
       }
+
+      const token = await this.createToken(user.id, user.email);
+
+      await this.redisClient.setEx(
+        `user-token-${user.id}`,
+        2 * 24 * 60 * 60,
+        token,
+      );
+      return { accessToken: token };
     } catch (e) {
       throw new BadRequestException(e.message);
     }
   }
 
-  async singOut(): Promise<void> {
+  async singOut(userId: string): Promise<void> {
     try {
+      await this.redisClient.del(`user-token-${userId}`);
     } catch (e) {
       throw new BadRequestException(e.message);
     }

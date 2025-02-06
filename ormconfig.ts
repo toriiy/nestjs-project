@@ -1,10 +1,11 @@
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
+import * as path from 'path';
+import * as process from 'process';
+
 import { User } from './src/database/entities/user.entity';
 import { Post } from './src/database/entities/post.entity';
 import configuration from './src/config/configuration';
-import * as path from 'path';
-import * as process from 'process';
 
 dotenv.config();
 

@@ -6,9 +6,8 @@ import { Post } from '../database/entities/post.entity';
 import { CreatePostDto } from './dto/req/create-post.dto';
 import { UpdatePostDto } from './dto/req/update-post.dto';
 import { PostResponseDto } from './dto/res/post-response.dto';
-import { PostQueryDto } from './dto/query/post-query.validator';
+import { PostQueryDto } from './dto/query/post-query.dto';
 import { PaginatedPostResponseDto } from './dto/res/paginated-post-response.dto';
-import { PostsOfUserResponse } from './dto/res/posts-of-user-response';
 
 @Injectable()
 export class PostService {
@@ -17,26 +16,34 @@ export class PostService {
     private readonly postRepository: Repository<Post>,
   ) {}
 
-  async create(createPostDto: CreatePostDto): Promise<PostResponseDto> {
+  async findAllUserPosts(
+    userId: string,
+    query: PostQueryDto,
+  ): Promise<PaginatedPostResponseDto> {
     try {
-      return await this.postRepository.save(
-        this.postRepository.create({
-          ...createPostDto,
-          userId: '55803b6a-c136-480c-ab81-8319e43a7b21',
-        }),
-      );
-    } catch (e) {
-      throw new BadRequestException(e.message);
-    }
-  }
-
-  async findAllUserPosts(userId: string): Promise<PostsOfUserResponse> {
-    try {
-      const posts = await this.postRepository.find({ where: { userId } });
-      if (!posts) {
-        throw new BadRequestException('Incorrect userId');
+      if (!userId) {
+        throw new BadRequestException('Invalid userId');
       }
-      return { userId, posts };
+
+      const options = {
+        page: +query?.page || 1,
+        limit: +query?.limit || 10,
+        order: query?.order || 'ASC',
+        sort: query?.sort || 'createdAt',
+      };
+      const [entities, total] = await this.postRepository.findAndCount({
+        where: { userId },
+        skip: (options.page - 1) * options.limit,
+        take: options.limit,
+        order: { [options.sort]: options.order },
+      });
+
+      return {
+        page: options.page,
+        totalPages: Math.ceil(total / options.limit),
+        totalItems: total,
+        entities: entities,
+      };
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -67,9 +74,34 @@ export class PostService {
     }
   }
 
+  async create(
+    createPostDto: CreatePostDto,
+    userId: string,
+  ): Promise<PostResponseDto> {
+    try {
+      return await this.postRepository.save(
+        this.postRepository.create({
+          ...createPostDto,
+          userId,
+        }),
+      );
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
+  }
+
   async findOne(id: string): Promise<PostResponseDto> {
     try {
-      return await this.postRepository.findOne({ where: { id } });
+      if (!id) {
+        throw new BadRequestException('Invalid Id');
+      }
+      const post = await this.postRepository.findOne({ where: { id } });
+
+      if (!post) {
+        throw new BadRequestException('Invalid Id');
+      }
+
+      return post;
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -78,8 +110,13 @@ export class PostService {
   async update(
     id: string,
     updatePostDto: UpdatePostDto,
+    userId: string,
   ): Promise<PostResponseDto> {
     try {
+      const post = await this.postRepository.findOne({ where: { id, userId } });
+      if (!post) {
+        throw new BadRequestException('Post not found');
+      }
       await this.postRepository.update(id, updatePostDto);
       return await this.postRepository.findOne({ where: { id } });
     } catch (e) {
@@ -87,8 +124,12 @@ export class PostService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, userId: string): Promise<void> {
     try {
+      const post = await this.postRepository.findOne({ where: { id, userId } });
+      if (!post) {
+        throw new BadRequestException('Post not found');
+      }
       await this.postRepository.delete(id);
     } catch (e) {
       throw new BadRequestException(e.message);

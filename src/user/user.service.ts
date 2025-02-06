@@ -6,7 +6,7 @@ import { User } from '../database/entities/user.entity';
 import { UpdateUserDto } from './dto/req/update-user.dto';
 import { UserResponseDto } from './dto/res/user-response.dto';
 import { PaginatedUserResponseDto } from './dto/res/paginated-user-response.dto';
-import { UserQueryDto } from './dto/query/user-query.validator';
+import { UserQueryDto } from './dto/query/user-query.dto';
 
 @Injectable()
 export class UserService {

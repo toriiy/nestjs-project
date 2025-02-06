@@ -1,5 +1,6 @@
-import { Post } from '../../../database/entities/post.entity';
 import { ApiProperty } from '@nestjs/swagger';
+
+import { Post } from '../../../database/entities/post.entity';
 
 export class PostsOfUserResponse {
   @ApiProperty()
