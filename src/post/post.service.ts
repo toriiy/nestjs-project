@@ -31,8 +31,18 @@ export class PostService {
         order: query?.order || 'ASC',
         sort: query?.sort || 'createdAt',
       };
+
+      if (
+        (query?.searchValue && !query?.searchField) ||
+        (!query?.searchValue && query?.searchField)
+      ) {
+        throw new BadRequestException(
+          'to search item by filed you have to use both searchField and searchValue',
+        );
+      }
+
       const [entities, total] = await this.postRepository.findAndCount({
-        where: { userId },
+        where: { userId, [query?.searchField]: query?.searchValue },
         skip: (options.page - 1) * options.limit,
         take: options.limit,
         order: { [options.sort]: options.order },
@@ -57,7 +67,18 @@ export class PostService {
         order: query?.order || 'ASC',
         sort: query?.sort || 'createdAt',
       };
+
+      if (
+        (query?.searchValue && !query?.searchField) ||
+        (!query?.searchValue && query?.searchField)
+      ) {
+        throw new BadRequestException(
+          'To search item by filed you have to use both searchField and searchValue',
+        );
+      }
+
       const [entities, total] = await this.postRepository.findAndCount({
+        where: { [query?.searchField]: query?.searchValue },
         skip: (options.page - 1) * options.limit,
         take: options.limit,
         order: { [options.sort]: options.order },

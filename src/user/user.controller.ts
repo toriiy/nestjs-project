@@ -33,6 +33,10 @@ export class UserController {
 
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({
+    description:
+      'To search item by filed you have to use both searchField and searchValue',
+  })
   @ApiResponse({ status: HttpStatus.OK, type: PaginatedUserResponseDto })
   @Get('/list')
   async findAll(
@@ -63,6 +67,7 @@ export class UserController {
 
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiResponse({
     status: HttpStatus.CREATED,
     type: UserResponseDto,
@@ -78,6 +83,7 @@ export class UserController {
 
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @HttpCode(204)
   @Delete('/me')

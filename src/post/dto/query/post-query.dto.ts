@@ -12,4 +12,24 @@ export class PostQueryDto extends QueryDto {
     enum: ['title', 'createdAt', 'updatedAt', 'userId', 'id'],
   })
   sort?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(['title', 'body', 'description', 'id', 'userId'])
+  @ApiProperty({
+    required: false,
+    description:
+      'if you wanna search post by field you have to use both searchField and searchValue',
+    enum: ['title', 'body', 'description', 'id', 'userId'],
+  })
+  searchField?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    required: false,
+    description:
+      'if you wanna search post by field you have to use both searchField and searchValue',
+  })
+  searchValue?: string;
 }

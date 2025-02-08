@@ -1,9 +1,10 @@
 import * as process from 'process';
 import * as dotenv from 'dotenv';
+import { IConfig } from './config.interface';
 
 dotenv.config();
 
-export default () => ({
+export default (): IConfig => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   database: {
     host: process.env.DB_HOST,

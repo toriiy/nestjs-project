@@ -17,10 +17,13 @@ export class Post extends DateEntity {
   @Column('text', { nullable: false })
   title: string;
 
+  @Column('text', { nullable: true })
+  description?: string;
+
   @Column('text', { nullable: false })
   body: string;
 
-  @Column()
+  @Column('uuid')
   userId: string;
 
   @ManyToOne(() => User, (entity) => entity.posts, {

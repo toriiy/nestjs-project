@@ -28,4 +28,24 @@ export class UserQueryDto extends QueryDto {
     ],
   })
   sort?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(['username', 'firstName', 'age', 'email', 'id'])
+  @ApiProperty({
+    required: false,
+    description:
+      'if you wanna search user by field you have to use both searchField and searchValue',
+    enum: ['username', 'firstName', 'age', 'email', 'id'],
+  })
+  searchField?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    required: false,
+    description:
+      'if you wanna search user by field you have to use both searchField and searchValue',
+  })
+  searchValue?: string;
 }

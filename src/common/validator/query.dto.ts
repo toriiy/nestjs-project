@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 
 export class QueryDto {
   @IsOptional()
@@ -14,9 +14,4 @@ export class QueryDto {
   @IsEnum(['ASC', 'DESC'])
   @ApiProperty({ required: false, enum: ['ASC', 'DESC'], default: 'ASC' })
   order: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty({ required: false })
-  search?: string;
 }

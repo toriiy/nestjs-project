@@ -5,5 +5,5 @@ import { PaginatedResponseDto } from '../../../common/interface/paginated-respon
 
 export class PaginatedUserResponseDto extends PaginatedResponseDto {
   @ApiProperty({ isArray: true })
-  entities: User[];
+  entities: Partial<User[]>;
 }

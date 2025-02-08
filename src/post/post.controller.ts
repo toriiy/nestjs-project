@@ -43,6 +43,10 @@ export class PostController {
   }
 
   @ApiResponse({ status: HttpStatus.OK, type: PaginatedPostResponseDto })
+  @ApiBadRequestResponse({
+    description:
+      'To search item by filed you have to use both searchField and searchValue',
+  })
   @Get('/list')
   findAll(@Query() query?: PostQueryDto): Promise<PaginatedPostResponseDto> {
     return this.postService.findAll(query);
@@ -50,6 +54,7 @@ export class PostController {
 
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @UseGuards(AuthGuard())
   @ApiResponse({ status: HttpStatus.CREATED, type: PostResponseDto })
   @HttpCode(201)

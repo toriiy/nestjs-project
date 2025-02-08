@@ -32,6 +32,26 @@
 $ npm install
 ```
 
+## Before running the project you have to
+
+- Create an env file and add variables such as PORT, DB_NAME etc. Example of them you can find in env.example file.
+
+- Start redis-server with this command
+
+```bash
+$ sudo service redis-server start
+```
+
+- To check if redis started you can use this command
+
+```bash
+$ redis-cli ping
+```
+
+
+### Api documentation you can find on http://localhost:3000/docs
+
+
 ## Compile and run the project
 
 ```bash
