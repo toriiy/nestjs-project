@@ -7,12 +7,14 @@ import { UpdateUserDto } from './dto/req/update-user.dto';
 import { UserResponseDto } from './dto/res/user-response.dto';
 import { PaginatedUserResponseDto } from './dto/res/paginated-user-response.dto';
 import { UserQueryDto } from './dto/query/user-query.dto';
+import { UserPresenter } from '../presenters/user.presenter';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly userPresenter: UserPresenter,
   ) {}
 
   async findAll(query?: UserQueryDto): Promise<PaginatedUserResponseDto> {
@@ -29,7 +31,7 @@ export class UserService {
         (!query?.searchValue && query?.searchField)
       ) {
         throw new BadRequestException(
-          'To search item by filed you have to use both searchField and searchValue',
+          'To search item by field you have to use both searchField and searchValue',
         );
       }
 
@@ -69,15 +71,7 @@ export class UserService {
       if (!user) {
         throw new BadRequestException('Invalid id');
       }
-      return {
-        id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        age: user.age,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
+      return this.userPresenter.toResponse(user);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -89,15 +83,7 @@ export class UserService {
       if (!user) {
         throw new BadRequestException('Invalid email');
       }
-      return {
-        id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        age: user.age,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
+      return this.userPresenter.toResponse(user);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -110,15 +96,7 @@ export class UserService {
     try {
       await this.userRepository.update(id, updateUserDto);
       const user = await this.userRepository.findOne({ where: { id } });
-      return {
-        id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        age: user.age,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
+      return this.userPresenter.toResponse(user);
     } catch (e) {
       throw new BadRequestException(e.message);
     }

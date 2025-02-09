@@ -37,7 +37,7 @@ export class PostService {
         (!query?.searchValue && query?.searchField)
       ) {
         throw new BadRequestException(
-          'to search item by filed you have to use both searchField and searchValue',
+          'to search item by field you have to use both searchField and searchValue',
         );
       }
 
@@ -73,7 +73,7 @@ export class PostService {
         (!query?.searchValue && query?.searchField)
       ) {
         throw new BadRequestException(
-          'To search item by filed you have to use both searchField and searchValue',
+          'To search item by field you have to use both searchField and searchValue',
         );
       }
 

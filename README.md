@@ -51,6 +51,17 @@ $ redis-cli ping
 
 ### Api documentation you can find on http://localhost:3000/docs
 
+## Migrations
+- To generate migration you can use this command
+```bash
+$ npm run migrate:generate
+```
+- To run migrations you can use this command
+
+```bash
+$ npm run migrate:run
+```
+
 
 ## Compile and run the project
 

@@ -19,7 +19,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: postgresConfig.password,
       database: postgresConfig.database,
       entities: [User, Post],
-      synchronize: false,
+      synchronize: true,
     };
   }
 }

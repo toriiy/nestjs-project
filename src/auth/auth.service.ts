@@ -21,6 +21,7 @@ export class AuthService {
     private readonly redisClient: RedisClient,
     private readonly jwtService: JwtService,
   ) {}
+
   async validateUser(userEmail: string, userId: string): Promise<User> {
     try {
       if (!userEmail || !userId) {

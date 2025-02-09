@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
 
 import { AuthService } from './auth.service';
+import { User } from '../database/entities/user.entity';
 
 @Injectable()
 export class BearerStrategy extends PassportStrategy(Strategy, 'bearer') {
@@ -17,7 +18,7 @@ export class BearerStrategy extends PassportStrategy(Strategy, 'bearer') {
     super();
   }
 
-  async validate(token: string) {
+  async validate(token: string): Promise<User> {
     try {
       const payload = this.jwtService.decode(token);
       if (!(await this.redisClient.exists(`user-token-${payload?.id}`))) {

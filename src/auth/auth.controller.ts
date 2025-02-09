@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiResponse,
   ApiUnauthorizedResponse,
@@ -19,12 +20,14 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/req/create-user.dto';
 import { SingInDto } from './dto/req/singIn.dto';
 import { RequestDto } from '../common/interface/request.dto';
+import { TokenResponseDto } from './dto/res/token.response.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiResponse({ status: HttpStatus.CREATED })
+  @ApiResponse({ status: HttpStatus.CREATED, type: TokenResponseDto })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @HttpCode(201)
   @Post('sing-up')
   async singUp(
@@ -33,6 +36,9 @@ export class AuthController {
     return await this.authService.singUp(createUserDto);
   }
 
+  @ApiResponse({ status: HttpStatus.CREATED, type: TokenResponseDto })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @HttpCode(201)
   @Post('sing-in')
   async singIn(@Body() singInDto: SingInDto): Promise<{ accessToken: string }> {
     return await this.authService.singIn(singInDto.email, singInDto.password);
@@ -40,6 +46,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @UseGuards(AuthGuard())
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @HttpCode(204)
